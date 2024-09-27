@@ -71,13 +71,13 @@ type ChargePoint interface {
 	DiagnosticsStatusNotification(status firmware.DiagnosticsStatus, props ...func(request *firmware.DiagnosticsStatusNotificationRequest)) (*firmware.DiagnosticsStatusNotificationConfirmation, error)
 	// Notifies the central system of a status change during the download of a new firmware version.
 	FirmwareStatusNotification(status firmware.FirmwareStatus, props ...func(request *firmware.FirmwareStatusNotificationRequest)) (*firmware.FirmwareStatusNotificationConfirmation, error)
-
+	// Informs the central system about critical security events.
 	SecurityEventNotification(typ string, timestamp *types.DateTime, props ...func(request *security.SecurityEventNotificationRequest)) (*security.SecurityEventNotificationResponse, error)
-
+	// Requests the central system to issue a new certificate.
 	SignCertificate(CSR string, props ...func(request *security.SignCertificateRequest)) (*security.SignCertificateResponse, error)
-
+	// Informs the central system about a connector status change.
 	SignedUpdateFirmwareStatusNotification(status securefirmware.FirmwareStatus, props ...func(request *securefirmware.SignedFirmwareStatusNotificationRequest)) (*securefirmware.SignedFirmwareStatusNotificationResponse, error)
-
+	// Updates the central system with the current log upload status.
 	LogStatusNotification(status logging.UploadLogStatus, requestId int, props ...func(request *logging.LogStatusNotificationRequest)) (*logging.LogStatusNotificationResponse, error)
 
 	// Registers a handler for incoming core profile messages
@@ -271,17 +271,16 @@ type CentralSystem interface {
 	ClearChargingProfile(clientId string, callback func(*smartcharging.ClearChargingProfileConfirmation, error), props ...func(request *smartcharging.ClearChargingProfileRequest)) error
 	// Queries a charge point to the composite smart charging schedules and rules for a specified time interval.
 	GetCompositeSchedule(clientId string, callback func(*smartcharging.GetCompositeScheduleConfirmation, error), connectorId int, duration int, props ...func(request *smartcharging.GetCompositeScheduleRequest)) error
-
 	TriggerMessageExtended(clientId string, callback func(*extendedtriggermessage.ExtendedTriggerMessageResponse, error), requestedMessage extendedtriggermessage.ExtendedTriggerMessageType, props ...func(request *extendedtriggermessage.ExtendedTriggerMessageRequest)) error
-
+	// Installs a new certificate (chain), signed by the CA, on the central system. This typically follows a SignCertificate message, initiated by the central system.
 	CertificateSigned(clientId string, callback func(*security.CertificateSignedResponse, error), csr string, props ...func(request *security.CertificateSignedRequest)) error
-
+	// Installs a new CA certificate on a central system.
 	InstallCertificate(clientId string, callback func(*certificates.InstallCertificateResponse, error), certificateType types.CertificateUse, certificate string, props ...func(request *certificates.InstallCertificateRequest)) error
-
+	// Retrieves all installed certificates on a central system.
 	GetInstalledCertificateIds(clientId string, callback func(*certificates.GetInstalledCertificateIdsResponse, error), certificateType types.CertificateUse, props ...func(request *certificates.GetInstalledCertificateIdsRequest)) error
-
+	// Deletes a previously installed certificate on a central system.
 	DeleteCertificate(clientId string, callback func(*certificates.DeleteCertificateResponse, error), certificateHashData types.CertificateHashData, props ...func(request *certificates.DeleteCertificateRequest)) error
-
+	// Instructs a central system to upload a diagnostics or security logfile to the central system.
 	GetLog(clientId string, callback func(*logging.GetLogResponse, error), logType logging.LogType, requestID int, logParameters logging.LogParameters, props ...func(request *logging.GetLogRequest)) error
 
 	SignedUpdateFirmware(clientId string, callback func(*securefirmware.SignedUpdateFirmwareResponse, error), requestId int, firmware securefirmware.Firmware, props ...func(request *securefirmware.SignedUpdateFirmwareRequest)) error
